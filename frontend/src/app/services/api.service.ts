@@ -5,12 +5,22 @@ declare global {
   interface Window { __APP_CONFIG?: { API_BASE?: string; AUTH_BASE?: string } }
 }
 
-const API_BASE = (window.__APP_CONFIG?.API_BASE && window.__APP_CONFIG.API_BASE.length > 0)
-  ? window.__APP_CONFIG.API_BASE
-  : '/api';
-const AUTH_BASE = (window.__APP_CONFIG?.AUTH_BASE && window.__APP_CONFIG.AUTH_BASE.length > 0)
-  ? window.__APP_CONFIG.AUTH_BASE
-  : '/auth';
+function resolveBase(defaultPath: string, devFallback: string): string {
+  const cfg = window.__APP_CONFIG;
+  if (cfg) {
+    const v = defaultPath.includes('auth') ? cfg.AUTH_BASE : cfg.API_BASE;
+    if (v && v.length > 0) return v;
+  }
+  // Dev server fallback: Angular on 4200, backend on 3000
+  if (location.host.includes('localhost:4200')) {
+    return devFallback;
+  }
+  // Same-origin relative in production
+  return defaultPath;
+}
+
+const API_BASE = resolveBase('/api', 'http://localhost:3000/api');
+const AUTH_BASE = resolveBase('/auth', 'http://localhost:3000/auth');
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {

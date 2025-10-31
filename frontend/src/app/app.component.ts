@@ -8,6 +8,7 @@ import { ApiService } from './services/api.service';
 })
 export class AppComponent implements OnInit {
   me: any;
+  isLoadingMe = true;
   loginHref = this.api.loginUrl();
 
   constructor(private api: ApiService) {}
@@ -16,5 +17,6 @@ export class AppComponent implements OnInit {
     try {
       this.me = await this.api.me();
     } catch {}
+    this.isLoadingMe = false;
   }
 }

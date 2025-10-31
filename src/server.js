@@ -19,6 +19,7 @@ import './utils/passport.js';
 import authRoutes from './routes/auth.js';
 import categoryRoutes from './routes/categories.js';
 import emailRoutes from './routes/emails.js';
+import accountRoutes from './routes/accounts.js';
 import { startPoller } from './workers/poller.js';
 
 dotenv.config();
@@ -79,6 +80,7 @@ app.get('/health', (req, res) => {
 app.use('/auth', authRoutes);
 app.use('/api/categories', ensureAuthenticated, categoryRoutes);
 app.use('/api/emails', ensureAuthenticated, emailRoutes);
+app.use('/api/accounts', ensureAuthenticated, accountRoutes);
 
 // Poller (import + archive)
 startPoller();

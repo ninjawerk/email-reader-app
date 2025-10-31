@@ -10,14 +10,32 @@ export class DashboardComponent implements OnInit {
   categories: any[] = [];
   newName = '';
   newDescription = '';
+  accounts: any[] = [];
+  hasAccounts = false;
+  connectHref = this.api.loginUrl();
 
   constructor(private api: ApiService) {}
 
   async ngOnInit() {
+    await this.loadAccounts();
     await this.load();
   }
 
+  async loadAccounts() {
+    try {
+      this.accounts = await this.api.listAccounts();
+      this.hasAccounts = (this.accounts || []).length > 0;
+    } catch {
+      this.accounts = [];
+      this.hasAccounts = false;
+    }
+  }
+
   async load() {
+    if (!this.hasAccounts) {
+      this.categories = [];
+      return;
+    }
     const me = await this.api.me();
     if (!me.authenticated) return;
     this.categories = await this.api.listCategories();

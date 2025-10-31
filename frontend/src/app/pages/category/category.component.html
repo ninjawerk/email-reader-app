@@ -1,50 +1,54 @@
-<div style="max-width:1100px; margin:24px auto;">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-    <h2>Category</h2>
+<div style="max-width:1200px; margin:24px auto; display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+  <div style="grid-column: 1 / -1; display:flex; justify-content:space-between; align-items:center;">
+    <h2 style="margin:0;">{{ categoryName || 'Category' }}</h2>
     <div>
       <button mat-stroked-button color="warn" (click)="bulkDelete()">Delete Selected</button>
       <button mat-flat-button color="primary" (click)="bulkUnsubscribe()" style="margin-left:8px;">Unsubscribe Selected</button>
     </div>
   </div>
 
-  <table mat-table [dataSource]="emails" class="mat-elevation-z1" style="width:100%">
-    <ng-container matColumnDef="select">
-      <th mat-header-cell *matHeaderCellDef>
-        <mat-checkbox (change)="toggleAll($event.checked)"></mat-checkbox>
-      </th>
-      <td mat-cell *matCellDef="let e">
-        <mat-checkbox [(ngModel)]="selected[e._id]"></mat-checkbox>
-      </td>
-    </ng-container>
+  <div>
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+      <mat-checkbox (change)="toggleAll($event.checked)"></mat-checkbox>
+      <span>Select all</span>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <mat-card *ngFor="let e of emails" (click)="openEmail(e)" style="cursor:pointer;">
+        <mat-card-header>
+          <mat-card-title>{{ e.subject || '(no subject)' }}</mat-card-title>
+          <mat-card-subtitle>
+            {{ e.from }} • {{ e.internalDate | date:'short' }}
+            <mat-chip class="account-chip" [style.background-color]="colorFor(e.accountEmail)" style="margin-left:8px;">{{ e.accountEmail }}</mat-chip>
+          </mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p>{{ e.summary }}</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <mat-checkbox [(ngModel)]="selected[e._id]">Select</mat-checkbox>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>
 
-    <ng-container matColumnDef="from">
-      <th mat-header-cell *matHeaderCellDef> From </th>
-      <td mat-cell *matCellDef="let e"> {{ e.from }} </td>
-    </ng-container>
-
-    <ng-container matColumnDef="subject">
-      <th mat-header-cell *matHeaderCellDef> Subject </th>
-      <td mat-cell *matCellDef="let e"> {{ e.subject }} </td>
-    </ng-container>
-
-    <ng-container matColumnDef="summary">
-      <th mat-header-cell *matHeaderCellDef> Summary </th>
-      <td mat-cell *matCellDef="let e"> {{ e.summary }} </td>
-    </ng-container>
-
-    <ng-container matColumnDef="date">
-      <th mat-header-cell *matHeaderCellDef> Date </th>
-      <td mat-cell *matCellDef="let e"> {{ e.internalDate | date:'short' }} </td>
-    </ng-container>
-
-    <ng-container matColumnDef="open">
-      <th mat-header-cell *matHeaderCellDef></th>
-      <td mat-cell *matCellDef="let e">
-        <a mat-button color="primary" [routerLink]="['/email', e._id]">Open</a>
-      </td>
-    </ng-container>
-
-    <tr mat-header-row *matHeaderRowDef="['select','from','subject','summary','date','open']"></tr>
-    <tr mat-row *matRowDef="let row; columns: ['select','from','subject','summary','date','open'];"></tr>
-  </table>
+  <div>
+    <mat-card *ngIf="focusedEmail">
+      <mat-card-header>
+        <mat-card-title>{{ focusedEmail.subject }}</mat-card-title>
+        <mat-card-subtitle>
+          From: {{ focusedEmail.from }} • {{ focusedEmail.internalDate | date:'short' }}
+          <mat-chip class="account-chip" [style.background-color]="colorFor(focusedEmail.accountEmail)" style="margin-left:8px;">{{ focusedEmail.accountEmail }}</mat-chip>
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p><strong>Summary:</strong> {{ focusedEmail.summary }}</p>
+        <div *ngIf="focusedEmail.rawHtml; else textBlock" style="border:1px solid #ddd; border-radius:8px;">
+          <iframe [srcdoc]="focusedEmail.rawHtml" style="width:100%; height:60vh; border:0;"></iframe>
+        </div>
+        <ng-template #textBlock>
+          <pre style="white-space: pre-wrap;">{{ focusedEmail.rawText }}</pre>
+        </ng-template>
+      </mat-card-content>
+    </mat-card>
+  </div>
 </div>

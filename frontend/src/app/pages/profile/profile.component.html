@@ -1,4 +1,4 @@
-<div style="max-width:600px; margin:24px auto;">
+<div style="max-width:900px; margin:24px auto; display:grid; gap:16px;">
   <mat-card *ngIf="me?.authenticated">
     <mat-card-title>Profile</mat-card-title>
     <mat-card-content>
@@ -8,5 +8,30 @@
     <mat-card-actions>
       <button mat-stroked-button color="primary" (click)="logout()">Logout</button>
     </mat-card-actions>
+  </mat-card>
+
+  <mat-card *ngIf="me?.authenticated">
+    <mat-card-title>Accounts</mat-card-title>
+    <mat-card-content>
+      <div style="margin-bottom:8px;">
+        <a mat-flat-button color="primary" [href]="connectHref">Connect another Google account</a>
+      </div>
+      <table mat-table [dataSource]="accounts" class="mat-elevation-z1" style="width:100%">
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef> Email </th>
+          <td mat-cell *matCellDef="let a">
+            <mat-chip class="account-chip" [style.background-color]="colorFor(a.email)" style="margin-right:8px;">{{ a.email }}</mat-chip>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef> </th>
+          <td mat-cell *matCellDef="let a">
+            <button mat-button color="warn" (click)="disconnect(a._id)">Disconnect</button>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="['email','actions']"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['email','actions'];"></tr>
+      </table>
+    </mat-card-content>
   </mat-card>
 </div>

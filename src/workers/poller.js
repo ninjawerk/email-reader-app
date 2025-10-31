@@ -90,7 +90,7 @@ export function startPoller() {
 	console.log(`Starting poller with schedule ${cronExp}`);
 	cron.schedule(cronExp, async () => {
 		try {
-			const accounts = await Account.find({});
+			const accounts = await Account.find({ active: true });
 			for (const account of accounts) {
 				await processAccount(account);
 			}

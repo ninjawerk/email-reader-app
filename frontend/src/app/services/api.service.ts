@@ -24,6 +24,16 @@ export class ApiService {
     return r.data;
   }
 
+  async listAccounts() {
+    const r = await axios.get(`${API_BASE}/accounts`);
+    return r.data;
+  }
+
+  async disconnectAccount(accountId: string) {
+    const r = await axios.delete(`${API_BASE}/accounts/${accountId}`);
+    return r.data;
+  }
+
   async listCategories() {
     const r = await axios.get(`${API_BASE}/categories`);
     return r.data;

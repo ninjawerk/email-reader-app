@@ -8,23 +8,39 @@ import { attemptUnsubscribe } from '../services/unsubscribeService.js';
 
 const router = express.Router();
 
+async function activeAccountIds(userId) {
+	const accounts = await Account.find({ userId, active: true }).select('_id').lean();
+	return accounts.map((a) => a._id);
+}
+
 router.get('/', async (req, res) => {
 	const { categoryId } = req.query;
-	const q = { userId: req.user._id };
+	const accIds = await activeAccountIds(req.user._id);
+	if (accIds.length === 0) return res.json([]);
+	const q = { userId: req.user._id, accountId: { $in: accIds } };
 	if (categoryId) q.categoryId = categoryId;
-	const emails = await Email.find(q).sort({ createdAt: -1 }).lean();
-	res.json(emails);
+	const emails = await Email.find(q)
+		.sort({ createdAt: -1 })
+		.populate({ path: 'accountId', select: 'email' })
+		.lean();
+	const result = emails.map(e => ({ ...e, accountEmail: e.accountId?.email }));
+	res.json(result);
 });
 
 router.get('/:id', async (req, res) => {
-	const email = await Email.findOne({ _id: req.params.id, userId: req.user._id }).lean();
+	const accIds = await activeAccountIds(req.user._id);
+	if (accIds.length === 0) return res.status(404).json({ error: 'Not found' });
+	const email = await Email.findOne({ _id: req.params.id, userId: req.user._id, accountId: { $in: accIds } })
+		.populate({ path: 'accountId', select: 'email' })
+		.lean();
 	if (!email) return res.status(404).json({ error: 'Not found' });
-	res.json(email);
+	res.json({ ...email, accountEmail: email.accountId?.email });
 });
 
 router.post('/bulk-delete', async (req, res) => {
+	const accIds = await activeAccountIds(req.user._id);
 	const { emailIds } = req.body; // array of Email._id
-	const emails = await Email.find({ _id: { $in: emailIds || [] }, userId: req.user._id });
+	const emails = await Email.find({ _id: { $in: emailIds || [] }, userId: req.user._id, accountId: { $in: accIds } });
 	const results = [];
 	for (const e of emails) {
 		const account = await Account.findById(e.accountId);
@@ -41,8 +57,9 @@ router.post('/bulk-delete', async (req, res) => {
 });
 
 router.post('/bulk-unsubscribe', async (req, res) => {
+	const accIds = await activeAccountIds(req.user._id);
 	const { emailIds } = req.body; // array of Email._id
-	const emails = await Email.find({ _id: { $in: emailIds || [] }, userId: req.user._id });
+	const emails = await Email.find({ _id: { $in: emailIds || [] }, userId: req.user._id, accountId: { $in: accIds } });
 	const results = [];
 	for (const e of emails) {
 		let success = false;

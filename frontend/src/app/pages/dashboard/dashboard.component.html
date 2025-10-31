@@ -1,35 +1,48 @@
 <div style="max-width:1000px; margin:24px auto;">
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
     <h2>Dashboard</h2>
-    <a mat-button color="primary" routerLink="/login">Switch account</a>
   </div>
 
-  <mat-card>
-    <mat-card-title>Add Category</mat-card-title>
-    <mat-card-content>
-      <form (submit)="createCategory($event)" class="row" style="display:flex; gap:12px; align-items:center;">
-        <mat-form-field appearance="outline" style="flex:0 0 220px;">
-          <mat-label>Name</mat-label>
-          <input matInput placeholder="Name" [(ngModel)]="newName" name="name" required />
-        </mat-form-field>
-        <mat-form-field appearance="outline" style="flex:1 1 auto;">
-          <mat-label>Description</mat-label>
-          <input matInput placeholder="Description" [(ngModel)]="newDescription" name="description" />
-        </mat-form-field>
-        <button mat-flat-button color="primary" type="submit">Add</button>
-      </form>
-    </mat-card-content>
-  </mat-card>
-
-  <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:12px; margin-top:16px;">
-    <mat-card *ngFor="let c of categories">
-      <mat-card-title>{{ c.name }}</mat-card-title>
+  <ng-container *ngIf="hasAccounts; else noAccounts">
+    <mat-card>
+      <mat-card-title>Add Category</mat-card-title>
       <mat-card-content>
-        <div style="color:#555">{{ c.description }}</div>
+        <form (submit)="createCategory($event)" class="row" style="display:flex; gap:12px; align-items:center;">
+          <mat-form-field appearance="outline" style="flex:0 0 220px;">
+            <mat-label>Name</mat-label>
+            <input matInput placeholder="Name" [(ngModel)]="newName" name="name" required />
+          </mat-form-field>
+          <mat-form-field appearance="outline" style="flex:1 1 auto;">
+            <mat-label>Description</mat-label>
+            <input matInput placeholder="Description" [(ngModel)]="newDescription" name="description" />
+          </mat-form-field>
+          <button mat-flat-button color="primary" type="submit">Add</button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:12px; margin-top:16px;">
+      <mat-card *ngFor="let c of categories">
+        <mat-card-title>
+          <div>{{ c.name }}</div>
+          <div style="color:#6b7280; font-size:12px; font-weight:400; margin-top:2px;">{{ c.description }}</div>
+        </mat-card-title>
+        <mat-card-actions>
+          <a mat-button color="primary" [routerLink]="['/category', c._id]">Open</a>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </ng-container>
+
+  <ng-template #noAccounts>
+    <mat-card>
+      <mat-card-title>No accounts connected</mat-card-title>
+      <mat-card-content>
+        <p>Connect a Google account to start importing and categorizing emails.</p>
       </mat-card-content>
       <mat-card-actions>
-        <a mat-button color="primary" [routerLink]="['/category', c._id]">Open</a>
+        <a mat-flat-button color="primary" [href]="connectHref">Connect Google account</a>
       </mat-card-actions>
     </mat-card>
-  </div>
+  </ng-template>
 </div>

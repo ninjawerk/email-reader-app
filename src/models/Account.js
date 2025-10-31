@@ -12,6 +12,7 @@ const AccountSchema = new mongoose.Schema(
 		tokenExpiry: { type: Number },
 		lastHistoryId: { type: String },
 		lastCheckedAt: { type: Date },
+		active: { type: Boolean, default: true, index: true },
 	},
 	{ timestamps: true }
 );

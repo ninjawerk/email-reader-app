@@ -6,6 +6,7 @@ import mongoose from 'mongoose';
 
 import User from '../models/User.js';
 import Account from '../models/Account.js';
+import Category from '../models/Category.js';
 
 passport.serializeUser((user, done) => {
 	done(null, user.id);
@@ -20,6 +21,14 @@ passport.deserializeUser(async (id, done) => {
 	}
 });
 
+async function ensureDefaultCategory(userId) {
+	const defaultName = 'General';
+	const exists = await Category.findOne({ userId, name: defaultName });
+	if (!exists) {
+		await Category.create({ userId, name: defaultName, description: 'Default category for uncategorized emails.' });
+	}
+}
+
 passport.use(
 	new GoogleStrategy(
 		{
@@ -30,33 +39,50 @@ passport.use(
 		},
 		async (req, accessToken, refreshToken, params, profile, done) => {
 			try {
-				// Upsert user
-				let user = await User.findOne({ googleId: profile.id });
+				const emailFromProfile = profile.emails && profile.emails[0] ? profile.emails[0].value : undefined;
+				const expiryDate = params && params.expires_in ? Date.now() + params.expires_in * 1000 : undefined;
+
+				let user = req.user;
 				if (!user) {
-					user = await User.create({
-						googleId: profile.id,
-						name: profile.displayName,
-						email: profile.emails && profile.emails[0] ? profile.emails[0].value : undefined,
-					});
+					// No active session: find or create user by googleId
+					user = await User.findOne({ googleId: profile.id });
+					if (!user) {
+						user = await User.create({
+							googleId: profile.id,
+							name: profile.displayName,
+							email: emailFromProfile,
+						});
+					}
+				} else {
+					// Active session: ensure user has a name/email if missing (don't override googleId)
+					if (!user.name && profile.displayName) user.name = profile.displayName;
+					if (!user.email && emailFromProfile) user.email = emailFromProfile;
+					await user.save();
 				}
 
-				// Upsert primary account for this user
-				const existing = await Account.findOne({ userId: user._id, email: user.email });
-				const expiryDate = params && params.expires_in ? Date.now() + params.expires_in * 1000 : undefined;
-				if (!existing) {
-					await Account.create({
+				await ensureDefaultCategory(user._id);
+
+				// Upsert account for this user (link multiple Gmail addresses)
+				const accountEmail = emailFromProfile;
+				if (!accountEmail) return done(new Error('Google did not return an email address for this account'));
+
+				let account = await Account.findOne({ userId: user._id, email: accountEmail });
+				if (!account) {
+					account = await Account.create({
 						userId: user._id,
-						email: user.email,
+						email: accountEmail,
 						provider: 'google',
 						accessToken,
 						refreshToken,
 						tokenExpiry: expiryDate,
+						active: true,
 					});
 				} else {
-					existing.accessToken = accessToken;
-					existing.refreshToken = refreshToken || existing.refreshToken;
-					existing.tokenExpiry = expiryDate || existing.tokenExpiry;
-					await existing.save();
+					account.accessToken = accessToken;
+					account.refreshToken = refreshToken || account.refreshToken;
+					account.tokenExpiry = expiryDate || account.tokenExpiry;
+					account.active = true; // reactivate if previously disconnected
+					await account.save();
 				}
 
 				return done(null, user);

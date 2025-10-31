@@ -3,7 +3,7 @@
   <span class="spacer"></span>
   <a mat-button routerLink="/">Dashboard</a>
   <a *ngIf="!me?.authenticated" mat-button [href]="loginHref">Login</a>
-  <a *ngIf="me?.authenticated" mat-button routerLink="/profile">Profile</a>
+  <a *ngIf="me?.authenticated" mat-button routerLink="/accounts">Accounts</a>
 </mat-toolbar>
 <div style="padding:16px">
   <router-outlet></router-outlet>

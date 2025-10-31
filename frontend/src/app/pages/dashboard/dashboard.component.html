@@ -1,4 +1,7 @@
-<div style="max-width:1000px; margin:24px auto;">
+<div *ngIf="isLoading" style="display:flex; align-items:center; justify-content:center; padding:48px;">
+  <mat-spinner diameter="40"></mat-spinner>
+</div>
+<div style="max-width:1000px; margin:24px auto;" *ngIf="!isLoading">
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
     <h2>Dashboard</h2>
   </div>

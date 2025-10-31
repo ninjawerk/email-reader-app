@@ -12,6 +12,7 @@ export class DashboardComponent implements OnInit {
   newDescription = '';
   accounts: any[] = [];
   hasAccounts = false;
+  isLoading = true;
   connectHref = this.api.loginUrl();
 
   constructor(private api: ApiService) {}
@@ -19,6 +20,7 @@ export class DashboardComponent implements OnInit {
   async ngOnInit() {
     await this.loadAccounts();
     await this.load();
+    this.isLoading = false;
   }
 
   async loadAccounts() {

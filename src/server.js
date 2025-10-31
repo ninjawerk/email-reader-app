@@ -76,6 +76,14 @@ app.get('/health', (req, res) => {
 	res.json({ status: 'ok' });
 });
 
+// Runtime frontend config
+app.get('/public/config.js', (req, res) => {
+	res.type('application/javascript');
+	const API_BASE = process.env.API_BASE || '';
+	const AUTH_BASE = process.env.AUTH_BASE || '';
+	res.send(`window.__APP_CONFIG = { API_BASE: '${API_BASE}', AUTH_BASE: '${AUTH_BASE}' };`);
+});
+
 // API Routes
 app.use('/auth', authRoutes);
 app.use('/api/categories', ensureAuthenticated, categoryRoutes);
@@ -91,7 +99,7 @@ if (fs.existsSync(path.join(distPath, 'index.html'))) {
 	app.use(express.static(distPath));
 	app.use((req, res, next) => {
 		if (req.method !== 'GET') return next();
-		if (req.path.startsWith('/api') || req.path.startsWith('/auth')) return next();
+		if (req.path.startsWith('/api') || req.path.startsWith('/auth') || req.path.startsWith('/public/config.js')) return next();
 		res.sendFile(path.join(distPath, 'index.html'));
 	});
 } else {

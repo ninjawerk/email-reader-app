@@ -1,8 +1,16 @@
 import { Injectable } from '@angular/core';
 import axios from 'axios';
 
-const API_BASE = 'http://localhost:3000/api';
-const AUTH_BASE = 'http://localhost:3000/auth';
+declare global {
+  interface Window { __APP_CONFIG?: { API_BASE?: string; AUTH_BASE?: string } }
+}
+
+const API_BASE = (window.__APP_CONFIG?.API_BASE && window.__APP_CONFIG.API_BASE.length > 0)
+  ? window.__APP_CONFIG.API_BASE
+  : '/api';
+const AUTH_BASE = (window.__APP_CONFIG?.AUTH_BASE && window.__APP_CONFIG.AUTH_BASE.length > 0)
+  ? window.__APP_CONFIG.AUTH_BASE
+  : '/auth';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {

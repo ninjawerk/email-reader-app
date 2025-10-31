@@ -1,0 +1,26 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "pwa-node",
+			"request": "launch",
+			"name": "Launch Server (dotenv)",
+			"program": "${workspaceFolder}/src/server.js",
+			"runtimeArgs": ["-r", "dotenv/config"],
+			"env": { "NODE_ENV": "development" },
+			"cwd": "${workspaceFolder}",
+			"skipFiles": ["<node_internals>/**"],
+			"console": "integratedTerminal"
+		},
+		{
+			"type": "pwa-node",
+			"request": "attach",
+			"name": "Attach to 9229",
+			"address": "localhost",
+			"port": 9229,
+			"restart": true,
+			"skipFiles": ["<node_internals>/**"],
+			"cwd": "${workspaceFolder}"
+		}
+	]
+}

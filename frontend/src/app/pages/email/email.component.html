@@ -1,0 +1,17 @@
+<div style="max-width:900px; margin:24px auto;">
+  <mat-card *ngIf="email">
+    <mat-card-header>
+      <mat-card-title>{{ email.subject }}</mat-card-title>
+      <mat-card-subtitle>From: {{ email.from }}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <p><strong>Summary:</strong> {{ email.summary }}</p>
+      <div *ngIf="email.rawHtml; else textBlock" style="border:1px solid #ddd; border-radius:8px;">
+        <iframe [srcdoc]="email.rawHtml" style="width:100%; height:60vh; border:0;"></iframe>
+      </div>
+      <ng-template #textBlock>
+        <pre style="white-space: pre-wrap;">{{ email.rawText }}</pre>
+      </ng-template>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,10 @@
+<mat-toolbar color="primary">
+  <span>AI Email Sorter</span>
+  <span class="spacer"></span>
+  <a mat-button routerLink="/">Dashboard</a>
+  <a *ngIf="!me?.authenticated" mat-button [href]="loginHref">Login</a>
+  <a *ngIf="me?.authenticated" mat-button routerLink="/profile">Profile</a>
+</mat-toolbar>
+<div style="padding:16px">
+  <router-outlet></router-outlet>
+</div>

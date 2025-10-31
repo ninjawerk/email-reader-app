@@ -1,0 +1,12 @@
+<div style="max-width:600px; margin:24px auto;">
+  <mat-card *ngIf="me?.authenticated">
+    <mat-card-title>Profile</mat-card-title>
+    <mat-card-content>
+      <p><strong>Name:</strong> {{ me.user?.name }}</p>
+      <p><strong>Email:</strong> {{ me.user?.email }}</p>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-stroked-button color="primary" (click)="logout()">Logout</button>
+    </mat-card-actions>
+  </mat-card>
+</div>

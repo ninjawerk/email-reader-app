@@ -62,9 +62,13 @@ export class ApiService {
     return r.data;
   }
 
-  async listEmails(categoryId?: string) {
-    const r = await axios.get(`${API_BASE}/emails`, { params: { categoryId } });
-    return r.data;
+  async listEmails(opts?: { categoryId?: string; page?: number; pageSize?: number }) {
+    const params: any = {};
+    if (opts?.categoryId) params.categoryId = opts.categoryId;
+    if (opts?.page) params.page = opts.page;
+    if (opts?.pageSize) params.pageSize = opts.pageSize;
+    const r = await axios.get(`${API_BASE}/emails`, { params });
+    return r.data as { items: any[]; total: number; page: number; pageSize: number } | any[];
   }
 
   async getEmail(id: string) {

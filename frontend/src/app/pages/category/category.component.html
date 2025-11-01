@@ -12,6 +12,15 @@
       <mat-checkbox (change)="toggleAll($event.checked)"></mat-checkbox>
       <span>Select all</span>
     </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <div>
+        <span>Page {{ page }} / {{ totalPages() }} • {{ total }} emails</span>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button mat-stroked-button (click)="prevPage()" [disabled]="page <= 1">Previous</button>
+        <button mat-stroked-button (click)="nextPage()" [disabled]="page >= totalPages()">Next</button>
+      </div>
+    </div>
     <div style="display:flex; flex-direction:column; gap:12px;">
       <mat-card *ngFor="let e of emails" (click)="openEmail(e)" style="cursor:pointer;">
         <mat-card-header>

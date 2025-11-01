@@ -15,16 +15,21 @@ async function activeAccountIds(userId) {
 
 router.get('/', async (req, res) => {
 	const { categoryId } = req.query;
+	const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+	const pageSize = Math.min(Math.max(parseInt(req.query.pageSize, 10) || 20, 1), 200);
 	const accIds = await activeAccountIds(req.user._id);
 	if (accIds.length === 0) return res.json([]);
 	const q = { userId: req.user._id, accountId: { $in: accIds } };
 	if (categoryId) q.categoryId = categoryId;
+	const total = await Email.countDocuments(q);
 	const emails = await Email.find(q)
 		.sort({ createdAt: -1 })
+		.skip((page - 1) * pageSize)
+		.limit(pageSize)
 		.populate({ path: 'accountId', select: 'email' })
 		.lean();
-	const result = emails.map(e => ({ ...e, accountEmail: e.accountId?.email }));
-	res.json(result);
+	const items = emails.map(e => ({ ...e, accountEmail: e.accountId?.email }));
+	res.json({ items, total, page, pageSize });
 });
 
 router.get('/:id', async (req, res) => {
